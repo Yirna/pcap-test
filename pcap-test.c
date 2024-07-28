@@ -42,12 +42,12 @@ struct tcp_hdr {
     uint16_t dst_port;
     uint32_t seq_num;
     uint32_t ack_num;
+    uint8_t reserved : 4;
     uint8_t header_len : 4;
-    uint16_t flags : 12;
+    uint8_t flags;
     uint16_t window_size;
     uint16_t checksum;
     uint16_t urgent_ptr;
-    uint8_t data[20]; // Flexible array member for data
 };
 
 bool parse(Param* param, int argc, char* argv[]) {
@@ -120,10 +120,11 @@ int main(int argc, char* argv[]) {
 
                 int tcp_header_len = tcp_hdr->header_len * 4;
                 int eth_header_len = 14;
-                const uint8_t* payload = (uint8_t*)tcp_hdr->data;
+                const uint8_t* payload = (uint8_t*)tcp_hdr + tcp_header_len;
                 int total_len = ntohs(ip_hdr->total_packet_len);
-                int header_len = ip_header_len + tcp_header_len + eth_header_len;                
+                int header_len = ip_header_len + tcp_header_len;                
                 int payload_len = total_len - header_len;
+
                 if (payload_len > 0) {
                     print_payload(payload, payload_len);
                 } else {
